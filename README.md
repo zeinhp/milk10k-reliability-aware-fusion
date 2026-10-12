@@ -3,7 +3,7 @@
 Code, frozen data splits, and evaluation outputs for a reliability-aware multimodal fusion study
 on the MILK10k dermatology dataset (clinical image, dermoscopy image, and tabular metadata). The
 full frozen research protocol (dataset handling, splits, model architecture, success criteria,
-statistical testing procedure) is documented in `CLAUDE.md`.
+statistical testing procedure) is documented in `RESEARCH_PROTOCOL.md`.
 
 **Headline finding:** the proposed reliability-aware fusion model does **not** significantly
 outperform conventional multimodal baselines (unimodal, naive concatenation, late fusion, gated
