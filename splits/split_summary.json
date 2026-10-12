@@ -1,0 +1,252 @@
+{
+  "seed0": {
+    "train": {
+      "n": 3667,
+      "class_counts": {
+        "BCC": 1765,
+        "NV": 522,
+        "BKL": 381,
+        "SCCKA": 331,
+        "MEL": 315,
+        "AKIEC": 212,
+        "DF": 36,
+        "INF": 35,
+        "VASC": 33,
+        "BEN_OTH": 31,
+        "MAL_OTH": 6
+      }
+    },
+    "val": {
+      "n": 524,
+      "class_counts": {
+        "BCC": 252,
+        "NV": 75,
+        "BKL": 54,
+        "SCCKA": 47,
+        "MEL": 45,
+        "AKIEC": 30,
+        "VASC": 5,
+        "BEN_OTH": 5,
+        "DF": 5,
+        "INF": 5,
+        "MAL_OTH": 1
+      }
+    },
+    "test": {
+      "n": 1049,
+      "class_counts": {
+        "BCC": 505,
+        "NV": 149,
+        "BKL": 109,
+        "SCCKA": 95,
+        "MEL": 90,
+        "AKIEC": 61,
+        "DF": 11,
+        "INF": 10,
+        "VASC": 9,
+        "BEN_OTH": 8,
+        "MAL_OTH": 2
+      }
+    }
+  },
+  "seed1": {
+    "train": {
+      "n": 3667,
+      "class_counts": {
+        "BCC": 1765,
+        "NV": 522,
+        "BKL": 381,
+        "SCCKA": 331,
+        "MEL": 315,
+        "AKIEC": 212,
+        "DF": 36,
+        "INF": 35,
+        "VASC": 33,
+        "BEN_OTH": 31,
+        "MAL_OTH": 6
+      }
+    },
+    "val": {
+      "n": 524,
+      "class_counts": {
+        "BCC": 252,
+        "NV": 75,
+        "BKL": 54,
+        "SCCKA": 47,
+        "MEL": 45,
+        "AKIEC": 30,
+        "DF": 5,
+        "BEN_OTH": 5,
+        "INF": 5,
+        "VASC": 5,
+        "MAL_OTH": 1
+      }
+    },
+    "test": {
+      "n": 1049,
+      "class_counts": {
+        "BCC": 505,
+        "NV": 149,
+        "BKL": 109,
+        "SCCKA": 95,
+        "MEL": 90,
+        "AKIEC": 61,
+        "DF": 11,
+        "INF": 10,
+        "VASC": 9,
+        "BEN_OTH": 8,
+        "MAL_OTH": 2
+      }
+    }
+  },
+  "seed2": {
+    "train": {
+      "n": 3667,
+      "class_counts": {
+        "BCC": 1765,
+        "NV": 522,
+        "BKL": 381,
+        "SCCKA": 331,
+        "MEL": 315,
+        "AKIEC": 212,
+        "DF": 36,
+        "INF": 35,
+        "VASC": 33,
+        "BEN_OTH": 31,
+        "MAL_OTH": 6
+      }
+    },
+    "val": {
+      "n": 524,
+      "class_counts": {
+        "BCC": 252,
+        "NV": 75,
+        "BKL": 54,
+        "SCCKA": 47,
+        "MEL": 45,
+        "AKIEC": 30,
+        "BEN_OTH": 5,
+        "DF": 5,
+        "VASC": 5,
+        "INF": 5,
+        "MAL_OTH": 1
+      }
+    },
+    "test": {
+      "n": 1049,
+      "class_counts": {
+        "BCC": 505,
+        "NV": 149,
+        "BKL": 109,
+        "SCCKA": 95,
+        "MEL": 90,
+        "AKIEC": 61,
+        "DF": 11,
+        "INF": 10,
+        "VASC": 9,
+        "BEN_OTH": 8,
+        "MAL_OTH": 2
+      }
+    }
+  },
+  "seed3": {
+    "train": {
+      "n": 3667,
+      "class_counts": {
+        "BCC": 1765,
+        "NV": 522,
+        "BKL": 381,
+        "SCCKA": 331,
+        "MEL": 315,
+        "AKIEC": 212,
+        "DF": 36,
+        "INF": 35,
+        "VASC": 33,
+        "BEN_OTH": 31,
+        "MAL_OTH": 6
+      }
+    },
+    "val": {
+      "n": 524,
+      "class_counts": {
+        "BCC": 252,
+        "NV": 75,
+        "BKL": 54,
+        "SCCKA": 47,
+        "MEL": 45,
+        "AKIEC": 30,
+        "INF": 5,
+        "DF": 5,
+        "BEN_OTH": 5,
+        "VASC": 5,
+        "MAL_OTH": 1
+      }
+    },
+    "test": {
+      "n": 1049,
+      "class_counts": {
+        "BCC": 505,
+        "NV": 149,
+        "BKL": 109,
+        "SCCKA": 95,
+        "MEL": 90,
+        "AKIEC": 61,
+        "DF": 11,
+        "INF": 10,
+        "VASC": 9,
+        "BEN_OTH": 8,
+        "MAL_OTH": 2
+      }
+    }
+  },
+  "seed4": {
+    "train": {
+      "n": 3667,
+      "class_counts": {
+        "BCC": 1765,
+        "NV": 522,
+        "BKL": 381,
+        "SCCKA": 331,
+        "MEL": 315,
+        "AKIEC": 212,
+        "DF": 36,
+        "INF": 35,
+        "VASC": 33,
+        "BEN_OTH": 31,
+        "MAL_OTH": 6
+      }
+    },
+    "val": {
+      "n": 524,
+      "class_counts": {
+        "BCC": 252,
+        "NV": 75,
+        "BKL": 54,
+        "SCCKA": 47,
+        "MEL": 45,
+        "AKIEC": 30,
+        "VASC": 5,
+        "INF": 5,
+        "DF": 5,
+        "BEN_OTH": 5,
+        "MAL_OTH": 1
+      }
+    },
+    "test": {
+      "n": 1049,
+      "class_counts": {
+        "BCC": 505,
+        "NV": 149,
+        "BKL": 109,
+        "SCCKA": 95,
+        "MEL": 90,
+        "AKIEC": 61,
+        "DF": 11,
+        "INF": 10,
+        "VASC": 9,
+        "BEN_OTH": 8,
+        "MAL_OTH": 2
+      }
+    }
+  }
+}

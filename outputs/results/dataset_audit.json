@@ -1,0 +1,70 @@
+{
+  "class_counts": {
+    "AKIEC": 303,
+    "BCC": 2522,
+    "BEN_OTH": 44,
+    "BKL": 544,
+    "DF": 52,
+    "INF": 50,
+    "MAL_OTH": 9,
+    "MEL": 450,
+    "NV": 746,
+    "SCCKA": 473,
+    "VASC": 47
+  },
+  "rare_classes_below_threshold": {
+    "MAL_OTH": 9
+  },
+  "duplicate_lesion_ids": 0,
+  "missing_metadata": {
+    "age_approx": {
+      "missing_count": 20,
+      "missing_pct": 0.38
+    },
+    "sex": {
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    "site": {
+      "missing_count": 31,
+      "missing_pct": 0.59
+    },
+    "skin_tone_class": {
+      "missing_count": 0,
+      "missing_pct": 0.0
+    }
+  },
+  "sex_distribution": {
+    "male": 3152,
+    "female": 2088
+  },
+  "site_distribution": {
+    "trunk": 1925,
+    "head_neck_face": 1491,
+    "lower_extremity": 1023,
+    "upper_extremity": 667,
+    "hand": 72,
+    "NaN": 31,
+    "foot": 23,
+    "genital": 8
+  },
+  "skin_tone_distribution": {
+    "3": 3174,
+    "4": 1066,
+    "2": 506,
+    "5": 383,
+    "1": 105,
+    "0": 6
+  },
+  "age_stats": {
+    "min": 5.0,
+    "max": 85.0,
+    "mean": 61.36,
+    "missing": 20
+  },
+  "sampled_missing_image_files": [],
+  "sampled_missing_image_files_count": 0,
+  "sample_size_checked": 500,
+  "total_lesions": 5240,
+  "total_classes": 11
+}

@@ -1,0 +1,128 @@
+# GTX1080-only variant of config.yaml, used ONLY for the reliability_aware overflow runs that
+# the two local GTX1080s pick up from the A4000 queue (see run_all.py groups gpu0_1080_rel /
+# gpu1_1080_rel). Every field is identical to configs/config.yaml (the protocol config used by
+# every A4000 run) EXCEPT training.batch_size, which is lowered from 32 to 16 below.
+#
+# WHY: reliability_aware instantiates all three encoders at once (2x ConvNeXt-Tiny + metadata
+# MLP) plus the auxiliary per-modality heads and reliability estimator. The A4000's naive_concat
+# C,D runs (only 2 encoders, no aux heads) already used ~8.3GB VRAM at batch_size=32 -- observed
+# via nvidia-smi during the live A4000 run. reliability_aware needs strictly more than that for
+# the same batch size, but the GTX1080 only has 8GB total (with ~0.3-0.5GB already reserved by
+# the OS/driver), so batch_size=32 would very likely OOM. batch_size=16 is a safety margin, not a
+# measured minimum -- it has NOT been test-run on the actual GTX1080 yet (both cards were busy
+# with LUNA16 when this was prepared), so a first launch should be watched for OOM/crash and the
+# batch size lowered further (e.g. 8) if it still fails.
+#
+# THIS IS A REAL METHODOLOGICAL DEVIATION, not just a performance tweak: any (seed, ablation_stage)
+# run trained here uses a different batch_size (and therefore a different number of gradient steps
+# per epoch, with the same fixed lr=3.0e-4) than the same run would get if A4000 trained it later
+# under config.yaml's batch_size=32. Because train.py's resume logic skips a run whose checkpoint
+# already reached its final epoch, whichever machine (GTX1080 here, or A4000 later) finishes a
+# given (seed, stage) run FIRST is the one whose batch_size actually produced that run's reported
+# numbers -- A4000 will not silently retrain it under batch_size=32 once a GTX1080 checkpoint
+# exists. Flag this explicitly in the paper's methodology / limitations if any reliability_aware
+# results end up seed/stage-attributable to a GTX1080 run rather than A4000 -- do not report it as
+# if every reliability_aware run used identical batch_size=32.
+#
+# Paths assume this project folder sits next to the extracted MILK10k data, e.g.:
+#   D:\Claude\milk10k\milk10k_project\        <- this project
+#   D:\Claude\milk10k\MILK10k_extracted\      <- extracted dataset (see scripts/extract_local.sh)
+# Adjust `data_root` if you place the extracted data elsewhere.
+
+data:
+  # Resolved relative to THIS configs/ folder (see common.py:resolve_data_paths), not the project
+  # root -- so reaching a dataset folder that sits next to milk10k_project/ needs "../.." (up out
+  # of configs/, then up out of the project root), not "..".
+  data_root: "../../MILK10k_extracted"
+  train_input_dir: "MILK10k_Training_Input"
+  test_input_dir: "MILK10k_Test_Input"
+  train_metadata_csv: "MILK10k_Training_Metadata.csv"
+  train_groundtruth_csv: "MILK10k_Training_GroundTruth.csv"
+  train_supplement_csv: "MILK10k_Training_Supplement.csv"
+  test_metadata_csv: "MILK10k_Test_Metadata.csv"
+
+classes:
+  # Order defines the label index used everywhere (must match GroundTruth CSV column order).
+  names: [AKIEC, BCC, BEN_OTH, BKL, DF, INF, MAL_OTH, MEL, NV, SCCKA, VASC]
+
+metadata_fields:
+  numerical: [age_approx]
+  categorical: [sex, site, skin_tone_class]
+  # MONET_* concept scores are intentionally NOT used as model input by default (see CLAUDE.md).
+  # They are loaded separately for error analysis only.
+  monet_columns:
+    - MONET_ulceration_crust
+    - MONET_hair
+    - MONET_vasculature_vessels
+    - MONET_erythema
+    - MONET_pigmented
+    - MONET_gel_water_drop_fluid_dermoscopy_liquid
+    - MONET_skin_markings_pen_ink_purple_pen
+
+split:
+  train_frac: 0.70
+  val_frac: 0.10
+  test_frac: 0.20
+  seeds: [0, 1, 2, 3, 4]
+  min_class_count_warning: 30   # flag classes with fewer lesions than this during audit
+  out_dir: "../splits"
+
+image:
+  resize: 256
+  crop: 224
+  rotation_deg: 15
+  # ImageNet normalization stats (generic pretrained ConvNeXt-Tiny init, no derm-specific backbone)
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+model:
+  backbone: convnext_tiny
+  pretrained: true
+  image_feat_dim: 768         # ConvNeXt-Tiny final feature dim
+  metadata_feat_dim: 256
+  fusion_latent_dim: 256
+  reliability_hidden_dim: 128
+
+training:
+  batch_size: 16   # lowered from config.yaml's 32 -- see header comment. UNTESTED on real GTX1080.
+  num_workers: 4
+  epochs: 60
+  lr: 3.0e-4
+  weight_decay: 1.0e-4
+  warmup_epochs: 3
+  early_stopping_patience: 10
+  lambda_reliability: 0.5     # weight on the reliability auxiliary BCE loss (proposed model only)
+  modality_dropout:
+    full_modality_prob: 0.5   # remaining 0.5 spread uniformly over the other 6 non-empty subsets
+  amp: true                   # mixed precision, recommended for local GPU training
+
+modality_configs:
+  # The seven mandatory evaluation configurations (order = evaluation order everywhere).
+  - [C]
+  - [D]
+  - [M]
+  - [C, D]
+  - [C, M]
+  - [D, M]
+  - [C, D, M]
+
+baselines:
+  families: [unimodal, naive_concat, late_fusion, gated_fusion, reliability_aware]
+
+ablation:
+  # cumulative flags matching CLAUDE.md's A1..Full table
+  stages:
+    A1:   {reliability_weighting: false, modality_dropout: false, disagreement: false, calibration: false, abstention: false}
+    A2:   {reliability_weighting: true,  modality_dropout: false, disagreement: false, calibration: false, abstention: false}
+    A3:   {reliability_weighting: true,  modality_dropout: true,  disagreement: false, calibration: false, abstention: false}
+    A4:   {reliability_weighting: true,  modality_dropout: true,  disagreement: true,  calibration: false, abstention: false}
+    A5:   {reliability_weighting: true,  modality_dropout: true,  disagreement: true,  calibration: true,  abstention: false}
+    Full: {reliability_weighting: true,  modality_dropout: true,  disagreement: true,  calibration: true,  abstention: true}
+
+subgroups:
+  age_bands: [[0, 40], [40, 60], [60, 200]]
+
+output:
+  checkpoints_dir: "../outputs/checkpoints"
+  logs_dir: "../outputs/logs"
+  results_dir: "../outputs/results"

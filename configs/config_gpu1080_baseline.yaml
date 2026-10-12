@@ -1,0 +1,128 @@
+# GTX1080-only variant of config.yaml, used ONLY for the baseline_multimodal overflow runs that
+# the two local GTX1080s pick up from the A4000 queue (see run_all.py groups gpu0_1080_base /
+# gpu1_1080_base). Every field is identical to configs/config.yaml EXCEPT training.batch_size,
+# lowered from 32 to 16.
+#
+# WHY: same reasoning as config_gpu1080_reliability.yaml -- A4000's naive_concat C,D runs (2
+# encoders) used ~8.3GB VRAM at batch_size=32, and the GTX1080 only has 8GB total. Note
+# baseline_multimodal (naive_concat/late_fusion/gated_fusion) has NO auxiliary reliability heads
+# or reliability estimator, so it needs less VRAM than reliability_aware did at the same batch
+# size -- batch_size=16 is very likely more conservative than strictly necessary here, but it's
+# kept for consistency with the already-validated reliability_aware config rather than risking an
+# untested higher batch size on a family we haven't run on a 1080 before. Can be bumped to 24 or
+# even back to 32 later if someone wants to spend a test run confirming headroom.
+#
+# METHODOLOGICAL CAVEAT: same as config_gpu1080_reliability.yaml -- whichever machine (1080 here,
+# or A4000) finishes a given (family, modality, seed) run FIRST is the one whose batch_size
+# produced that run's reported numbers, since train.py's resume logic skips a run whose checkpoint
+# already reached its final epoch. Flag in the paper's methodology/limitations if any
+# baseline_multimodal results end up attributable to a GTX1080 run rather than A4000.
+#
+# COLLISION CAVEAT (does not apply to config_gpu1080_reliability.yaml, only this one): unlike the
+# reliability_aware overflow, A4000 was ALREADY partway through this exact 60-run list when this
+# config/overflow was added (17 Aug) -- see the long comment in run_all.py above
+# split_baseline_multimodal_across_two_gpus() for the required BASELINE_MULTIMODAL_SKIP_FIRST_N /
+# --baseline_skip_first_n safety step. Do not launch gpu0_1080_base / gpu1_1080_base without it.
+#
+# Paths assume this project folder sits next to the extracted MILK10k data, e.g.:
+#   D:\Claude\milk10k\milk10k_project\        <- this project
+#   D:\Claude\milk10k\MILK10k_extracted\      <- extracted dataset (see scripts/extract_local.sh)
+# Adjust `data_root` if you place the extracted data elsewhere.
+
+data:
+  # Resolved relative to THIS configs/ folder (see common.py:resolve_data_paths), not the project
+  # root -- so reaching a dataset folder that sits next to milk10k_project/ needs "../.." (up out
+  # of configs/, then up out of the project root), not "..".
+  data_root: "../../MILK10k_extracted"
+  train_input_dir: "MILK10k_Training_Input"
+  test_input_dir: "MILK10k_Test_Input"
+  train_metadata_csv: "MILK10k_Training_Metadata.csv"
+  train_groundtruth_csv: "MILK10k_Training_GroundTruth.csv"
+  train_supplement_csv: "MILK10k_Training_Supplement.csv"
+  test_metadata_csv: "MILK10k_Test_Metadata.csv"
+
+classes:
+  # Order defines the label index used everywhere (must match GroundTruth CSV column order).
+  names: [AKIEC, BCC, BEN_OTH, BKL, DF, INF, MAL_OTH, MEL, NV, SCCKA, VASC]
+
+metadata_fields:
+  numerical: [age_approx]
+  categorical: [sex, site, skin_tone_class]
+  # MONET_* concept scores are intentionally NOT used as model input by default (see CLAUDE.md).
+  # They are loaded separately for error analysis only.
+  monet_columns:
+    - MONET_ulceration_crust
+    - MONET_hair
+    - MONET_vasculature_vessels
+    - MONET_erythema
+    - MONET_pigmented
+    - MONET_gel_water_drop_fluid_dermoscopy_liquid
+    - MONET_skin_markings_pen_ink_purple_pen
+
+split:
+  train_frac: 0.70
+  val_frac: 0.10
+  test_frac: 0.20
+  seeds: [0, 1, 2, 3, 4]
+  min_class_count_warning: 30   # flag classes with fewer lesions than this during audit
+  out_dir: "../splits"
+
+image:
+  resize: 256
+  crop: 224
+  rotation_deg: 15
+  # ImageNet normalization stats (generic pretrained ConvNeXt-Tiny init, no derm-specific backbone)
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+model:
+  backbone: convnext_tiny
+  pretrained: true
+  image_feat_dim: 768         # ConvNeXt-Tiny final feature dim
+  metadata_feat_dim: 256
+  fusion_latent_dim: 256
+  reliability_hidden_dim: 128
+
+training:
+  batch_size: 16   # lowered from config.yaml's 32 -- see header comment.
+  num_workers: 4
+  epochs: 60
+  lr: 3.0e-4
+  weight_decay: 1.0e-4
+  warmup_epochs: 3
+  early_stopping_patience: 10
+  lambda_reliability: 0.5     # weight on the reliability auxiliary BCE loss (proposed model only)
+  modality_dropout:
+    full_modality_prob: 0.5   # remaining 0.5 spread uniformly over the other 6 non-empty subsets
+  amp: true                   # mixed precision, recommended for local GPU training
+
+modality_configs:
+  # The seven mandatory evaluation configurations (order = evaluation order everywhere).
+  - [C]
+  - [D]
+  - [M]
+  - [C, D]
+  - [C, M]
+  - [D, M]
+  - [C, D, M]
+
+baselines:
+  families: [unimodal, naive_concat, late_fusion, gated_fusion, reliability_aware]
+
+ablation:
+  # cumulative flags matching CLAUDE.md's A1..Full table
+  stages:
+    A1:   {reliability_weighting: false, modality_dropout: false, disagreement: false, calibration: false, abstention: false}
+    A2:   {reliability_weighting: true,  modality_dropout: false, disagreement: false, calibration: false, abstention: false}
+    A3:   {reliability_weighting: true,  modality_dropout: true,  disagreement: false, calibration: false, abstention: false}
+    A4:   {reliability_weighting: true,  modality_dropout: true,  disagreement: true,  calibration: false, abstention: false}
+    A5:   {reliability_weighting: true,  modality_dropout: true,  disagreement: true,  calibration: true,  abstention: false}
+    Full: {reliability_weighting: true,  modality_dropout: true,  disagreement: true,  calibration: true,  abstention: true}
+
+subgroups:
+  age_bands: [[0, 40], [40, 60], [60, 200]]
+
+output:
+  checkpoints_dir: "../outputs/checkpoints"
+  logs_dir: "../outputs/logs"
+  results_dir: "../outputs/results"
